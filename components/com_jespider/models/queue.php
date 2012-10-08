@@ -33,6 +33,11 @@ defined('_JEXEC') or die;
 class JESpiderModelQueue extends JModelLegacy
 {
 	/**
+	 * @var int
+	 */
+	protected $id;
+	
+	/**
 	 * Short description (required, followed by a blank line)
 	 * Long description (optional, followed by a blank line)
 	 * @package
@@ -48,7 +53,7 @@ class JESpiderModelQueue extends JModelLegacy
 	{
 		if ($force || $this->isEmpty())
 		{
-			$db		= $this->getDbo();
+			$db		= JFactory::getDbo();
 			$query	= $db->getQuery(true);
 			
 			$db->setQuery('TRUNCATE TABLE #__jes_queues');
@@ -137,7 +142,7 @@ class JESpiderModelQueue extends JModelLegacy
 	 */
 	public function getSize()
 	{
-		$db		= $this->getDbo();
+		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 		
 		$query->select('COUNT(*)')
@@ -163,7 +168,7 @@ class JESpiderModelQueue extends JModelLegacy
 	 */
 	public function isEmpty()
 	{
-		$db		= $this->getDbo();
+		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 		
 		$query->select('COUNT(*)')
@@ -189,7 +194,7 @@ class JESpiderModelQueue extends JModelLegacy
 	 */
 	public function pop()
 	{
-		$db		= $this->getDbo();
+		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 		
 		$query->select('*')
@@ -203,12 +208,14 @@ class JESpiderModelQueue extends JModelLegacy
 		if ($row)
 		{
 			JLoader::import("models.crawler", JPATH_COMPONENT);
-			$this->id		= $row->id;
-			$params			= new JRegistry($row->params);
-			$crawler		= new JESpiderModelCrawler($params->get('crawler_id'));
-			$crawler->url	= $params->get('url');
-			$crawler->queue	= $this;
-			$crawler->loadParams($row->params);
+			$this->id				= $row->id;
+			$params					= new JRegistry($row->params);
+			$crawler				= new JESpiderModelCrawler($params->get('crawler_id'), $params);
+			$crawler->url			= $params->get('url');
+			$crawler->site_id		= $params->get('site_id');
+			$crawler->crawler_id	= $params->get('crawler_id');
+			$crawler->queue			= $this;
+			//$crawler->loadParams($row->params);
 				
 			// Mark processing in queue
 			$query = $db->getQuery(true);
@@ -224,5 +231,28 @@ class JESpiderModelQueue extends JModelLegacy
 		{
 			return null;
 		}
+	}
+	
+	/**
+	 * Short description (required, followed by a blank line)
+	 * Long description (optional, followed by a blank line)
+	 * @package
+	 * @subpackage
+	 * 
+	 * @param (required if there are method or function arguments, the last @param tag is followed by a blank line)
+	 * 
+	 * @return (required, followed by a blank line)
+	 * 
+	 * @since
+	 */
+	public function remove()
+	{
+		$db		= JFactory::getDbo();
+		$query	= $db->getQuery(true);
+		$query->update('#__jes_queues')
+			->set('status = 2')
+			->where('id = '.$this->id);
+		$db->setQuery($query);
+		$db->query();
 	}
 }
