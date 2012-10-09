@@ -55,7 +55,7 @@ class JESpiderModelCrawler extends JModelLegacy
 	/**
 	 * @var String
 	 */
-	protected $url;
+	public $url;
 	
 	/**
 	 * Short description (required, followed by a blank line)
@@ -148,7 +148,9 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function crawl()
 	{
+		$this->url = 'http://extensions.joomla.org/extensions/tools/database-tools';
 		$content = $this->getContent();
+		//echo $content; die();
 		if (empty($content))
 		{
 			return false;
@@ -167,7 +169,7 @@ class JESpiderModelCrawler extends JModelLegacy
 		{
 			$this->queue->remove();
 		}
-		
+		die();
 		return $parsed;
 	}
 	
@@ -229,6 +231,8 @@ class JESpiderModelCrawler extends JModelLegacy
 	{
 		$content = $this->clean($content, 'items');
 		$pattern = $this->params->get('regex.items');
+		//$pattern = '<div class="listing-summary">\s*<h3><a href="(?P<link>.*?)"[^>]>.*?</a> </h3>(?:<a href="\1"><img[^>]* src="(?P<avatar>[^"]*)")?';
+		//echo $content;die();
 
 		if (preg_match_all("#{$pattern}#is", $content, $matches))
 		{
@@ -254,13 +258,13 @@ class JESpiderModelCrawler extends JModelLegacy
 					$this->queue->add($params);
 				}
 			}
-			return true;
+			//return true;
 		}
 		else
 		{
-			return false;
+			//return false;
 		}
-		//print_r($matches);die();
+		print_r($matches);die();
 	}
 	
 	/**
@@ -293,13 +297,13 @@ class JESpiderModelCrawler extends JModelLegacy
 				}
 			}
 				
-			return true;
+			//return true;
 		}
 		else
 		{
-			return false;
+			//return false;
 		}
-		//print_r($matches);die();
+		print_r($matches);die();
 	}
 	
 	/**
@@ -316,14 +320,14 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	protected function clean($content, $key)
 	{
-		$cleanPattern = $this->params->get("regex.clean.{$key}", '');
-		$cleanPattern = str_replace('|', '<jespider-separate>', $cleanPattern);
-		$cleanPattern = str_replace('\<jespider-separate>', '\|', $cleanPattern);
+		$patterns = $this->params->get("regex.clean.{$key}", '');
+		$patterns = str_replace('|', '<jespider-separate>', $patterns);
+		$patterns = str_replace('\<jespider-separate>', '\|', $patterns);
 		
-		if (!empty($cleanPattern))
+		if (!empty($patterns))
 		{
-			$cleanPattern = explode('<jespider-separate>', $cleanPattern);
-			foreach ($cleanPattern as $pattern)
+			$patterns = explode('<jespider-separate>', $patterns);
+			foreach ($patterns as $pattern)
 			{
 				if (!empty($pattern))
 				{

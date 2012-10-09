@@ -61,6 +61,7 @@ class JESpiderModelSite extends JModelLegacy
 		$this->cHandle = curl_init();
 		
 		$cookiePath = JPATH_COMPONENT_SITE.'/cookies/';
+		jimport('joomla.filesystem.folder');
 		if (!JFolder::exists($cookiePath))
 		{
 			JFolder::create($cookiePath);
@@ -184,7 +185,7 @@ class JESpiderModelSite extends JModelLegacy
 			return self::$cache[$siteId];
 		}
 		
-		$site = new JESpiderModelSites($siteId);
+		$site = new JESpiderModelSite($siteId);
 		self::$cache[$siteId] = $site;
 		
 		return self::$cache[$siteId];

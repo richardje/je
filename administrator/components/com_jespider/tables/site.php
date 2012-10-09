@@ -16,7 +16,7 @@
 
 defined('_JEXEC') or die;
 
-class JESpierTableSite extends JTable
+class JESpiderTableSite extends JTable
 {
 	/**
 	 * Short description (required, followed by a blank line)
@@ -32,6 +32,6 @@ class JESpierTableSite extends JTable
 	 */
 	function __construct(&$db)
 	{
-		parent::__construct('#__spd_site', 'id', $db);
+		parent::__construct('#__jes_sites', 'id', $db);
 	}
 }

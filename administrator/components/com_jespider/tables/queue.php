@@ -46,6 +46,6 @@ class JESpiderTableQueue extends JTable
 	 */
 	function __construct(&$db)
 	{
-		parent::__construct('#__spd_queues', 'id', $db);
+		parent::__construct('#__jes_queues', 'id', $db);
 	}
 }
