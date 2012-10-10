@@ -136,6 +136,7 @@ class JESpiderModelSite extends JModelLegacy
 		
 		$content = preg_replace_callback('#(<\w+[^>]* (?:href|src)\s*=\s*)(["\'])(.*?)\2#is', array($this, 'relToAbs'), $content);
 		$content = preg_replace("#(?!\r)\n#is", "\r\n", $content);
+		$content = preg_replace("#\r\n#is", "\n", $content);
 		
 		return $content;
 	}
