@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="1.7" type="plugin" group="jespider">
+	<name>jed</name>
+	<author>Richard</author>
+	<creationDate>October 2012</creationDate>
+	<copyright>Copyright (C) 2012 JoomExts. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>richard@joomexts.com</authorEmail>
+	<authorUrl>www.joomexts.com</authorUrl>
+	<version>1.0</version>
+	<description></description>
+	<files>
+		<filename plugin="jed">jed.php</filename>
+	</files>
+	<config>
+	</config>
+</extension>
