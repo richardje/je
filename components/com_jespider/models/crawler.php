@@ -148,8 +148,8 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function crawl()
 	{
-		$this->url = 'http://extensions.joomla.org/extensions/e-commerce/e-commerce-integrations/21948';
-		$this->params->set('crawling_data', true);
+		$this->url = 'http://extensions.joomla.org/extensions/administration';
+		$this->params->set('crawling_data', false);
 		$content = $this->getContent();
 		//echo $content; die();
 		if (empty($content))
@@ -170,7 +170,7 @@ class JESpiderModelCrawler extends JModelLegacy
 		{
 			$this->queue->remove();
 		}
-		die();
+		//die();
 		return $parsed;
 	}
 	
@@ -282,16 +282,6 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function parsePageLinks($content)
 	{
-		if (preg_match('#<span class="breadcrumbs pathway">(.*?)</span>#is', $content, $matches))
-		{
-			$breadcrumbs = $matches[1];
-			$breadcrumbs = preg_replace('#^\s*<a[^>]*>.*?</a>\s*<img[^>]*>\s*#is', '', $breadcrumbs);
-			$breadcrumbs = preg_replace('#\s*<img[^>]*>\s*$#is', '', $breadcrumbs);
-			$breadcrumbs = preg_replace('#\s*<img[^>]*>\s*#is', '|', $breadcrumbs);
-			$breadcrumbs = strip_tags($breadcrumbs);
-			$breadcrumbs = htmlspecialchars_decode($breadcrumbs);
-		}
-		
 		$description = '';
 		if (preg_match('#<div id="cat-desc">(.*?)</div>#is', $content, $matches))
 		{
@@ -299,11 +289,7 @@ class JESpiderModelCrawler extends JModelLegacy
 			$description = strip_tags($description);
 			$description = trim($description);
 		}
-		
-		if (!empty($breadcrumbs))
-		{
-			$this->params->set('data.'.$breadcrumbs, $description);
-		}
+		$this->params->set('data.'.$this->params->get('depth'), $description);
 		
 		$content = $this->clean($content, 'pages');
 		$pattern = $this->params->get('regex.pages');

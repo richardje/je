@@ -200,7 +200,7 @@ class JESpiderModelQueue extends JModelLegacy
 		$query->select('*')
 			->from('#__jes_queues')
 			->where('status = 0')
-			->order('created ASC');
+			->order('created DESC');
 		
 		$db->setQuery($query, 0, 1);
 		$row = $db->loadObject();

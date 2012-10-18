@@ -18,35 +18,48 @@ class plgJESpiderJed extends JPlugin
 
 	public function onAfterParseData($params)
 	{
-		print_r($params);die('test');
+		print_r($params);die();
 		$db = JFactory::getDbo();
 		$table = new JTableJed($db);
 		$table->load(array('md5url' => md5($params->get('url'))));
 		
-		$lastUpdate = new JDate($params->get('data.last_update'));
-		$dateAdded = new JDate($params->get('data.date_added'));
+		$lastUpdate				= new JDate($params->get('data.last_update'));
+		$dateAdded				= new JDate($params->get('data.date_added'));
 		
-		$table->url = $params->get('url');
-		$table->md5url = md5($table->url);
-		$table->catid = $this->getCategory($params->get('data.breadcrumbs'));
-		$table->title = $params->get('data.title');
-		$table->feature = ($params->get('data.feature') == '') ? false : true;
-		$table->popular = ($params->get('data.popular') == '') ? false : true;
-		$table->component = ($params->get('data.component') == '') ? false : true;
-		$table->module = ($params->get('data.module') == '') ? false : true;
-		$table->plugin = ($params->get('data.plugin') == '') ? false : true;
-		$table->language = ($params->get('data.language') == '') ? false : true;
-		$table->specific = ($params->get('data.specific') == '') ? false : true;
-		$table->version = $params->get('data.version');
-		$table->last_update = $lastUpdate->toSql();
-		$table->rating = $params->get('data.rating');
-		$table->rating_user = $params->get('data.rating_user');
-		$table->compat_15 = ($params->get('data.compat_15') == '') ? false : true;
-		$table->compat_25 = ($params->get('data.compat_25') == '') ? false : true;
-		$table->favorite = $params->get('data.favorite');
-		$table->license = $params->get('data.license');
-		$table->view = $params->get('data.view');
-		$table->date_added = $dateAdded->toSql();
+		$table->url				= $params->get('url');
+		$table->md5url			= md5($table->url);
+		$table->title			= $params->get('title', '');
+		$table->fulltext		= $params->get('description', '');
+		$table->catid			= $this->getCategory($params);
+		
+		$table->feature			= ($params->get('data.feature')		== '') ? false : true;
+		$table->popular			= ($params->get('data.popular')		== '') ? false : true;
+		$table->component		= ($params->get('data.component')	== '') ? false : true;
+		$table->module			= ($params->get('data.module')		== '') ? false : true;
+		$table->plugin			= ($params->get('data.plugin')		== '') ? false : true;
+		$table->language		= ($params->get('data.language')	== '') ? false : true;
+		$table->specific		= ($params->get('data.specific')	== '') ? false : true;
+		$table->compat_15		= ($params->get('data.compat_15')	== '') ? false : true;
+		$table->compat_25 		= ($params->get('data.compat_25')	== '') ? false : true;
+		$table->compat_30 		= ($params->get('data.compat_30')	== '') ? false : true;
+		
+		$table->version			= $params->get('data.version');
+		$table->date_added		= $dateAdded->toSql();
+		$table->last_update		= $lastUpdate->toSql();
+		$table->rating			= $params->get('data.rating', 0);
+		$table->rating_user		= $params->get('data.rating_user', 0);
+		$table->favorite		= $params->get('data.favorite', 0);
+		$table->license			= $params->get('data.license', '');
+		$table->view			= $params->get('data.view', 0);
+		
+		$table->developer		= $params->get('data.developer', '');
+		$table->website			= $params->get('data.website');
+		$table->download_link	= $params->get('data.download_link');
+		$table->demo_link		= $params->get('data.demo_link');
+		$table->support_link	= $params->get('data.support_link');
+		$table->document_link	= $params->get('data.document_link');
+		
+		print_r($table);die();
 		
 		if ($table->store())
 		{
@@ -54,8 +67,25 @@ class plgJESpiderJed extends JPlugin
 		}
 	}
 	
-	protected function getCategory($breadcrumbs)
+	protected function getRedirectUrl($url)
 	{
+		$ch = curl_init();
+		
+		curl_setopt($ch, CURLOPT_URL,            $url);
+		curl_setopt($ch, CURLOPT_HEADER,         true);
+		curl_setopt($ch, CURLOPT_NOBODY,         true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT,        10);
+		
+		$r = curl_exec($ch);
+		$lasturl = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
+
+		return $lasturl;
+	}
+	
+	protected function getCategory($params)
+	{
+		$breadcrumbs = $params->get('data.breadcrumbs');
 		$breadcrumbs = preg_replace('#^\s*<a[^>]*>.*?</a>\s*<img[^>]*>\s*#is', '', $breadcrumbs);
 		$breadcrumbs = preg_replace('#\s*<img[^>]*>\s*$#is', '', $breadcrumbs);
 		$breadcrumbs = preg_replace('#\s*<img[^>]*>\s*#is', '|', $breadcrumbs);
@@ -63,8 +93,9 @@ class plgJESpiderJed extends JPlugin
 		$breadcrumbs = htmlspecialchars_decode($breadcrumbs);
 		$breadcrumbs = explode('|', $breadcrumbs);
 		
-		$db = JFactory::getDbo();
-		$parentId = 1;
+		$db			= JFactory::getDbo();
+		$parentId	= 1;
+		$depth		= $params->get('depth');
 		
 		foreach ($breadcrumbs as $title)
 		{
@@ -73,15 +104,13 @@ class plgJESpiderJed extends JPlugin
 			$table->load(array('alias' => $alias, 'extension' => 'com_jed'));
 			if (empty($table->id))
 			{
-				$table->title = $title;
-				$table->alias = $alias;
-				$table->extension = 'com_jed';
-				//$table->parent_id = $parentId;
-				$table->published = 1;
-				$table->access = 1;
-				//$table->level = 1;
-				$table->created_user_id = 42;
-				$table->language = '*';
+				$table->title			= $title;
+				$table->alias			= $alias;
+				$table->extension		= 'com_jed';
+				$table->published		= 1;
+				$table->access			= 1;
+				$table->created_user_id	= 42;
+				$table->language		= '*';
 				
 				$table->setLocation($parentId, 'last-child');
 				
