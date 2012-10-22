@@ -9,3 +9,6 @@ extensions.joomla.org	FALSE	/extensions/e-commerce/e-commerce-integrations/	FALS
 extensions.joomla.org	FALSE	/extensions/sports-a-games/world-of-warcraft-game/	FALSE	1350571501	mtlink_hit22027	1
 extensions.joomla.org	FALSE	/extensions/sports-a-games/world-of-warcraft-game/	FALSE	1350595949	mtlink_hit20414	1
 extensions.joomla.org	FALSE	/extensions/sports-a-games/world-of-warcraft-game/	FALSE	1350597007	mtlink_hit15623	1
+extensions.joomla.org	FALSE	/extensions/vertical-markets/vehicles/	FALSE	1350949579	mtlink_hit21582	1
+extensions.joomla.org	FALSE	/extensions/vertical-markets/vehicles/	FALSE	1350949810	mtlink_hit14495	1
+extensions.joomla.org	FALSE	/extensions/access-a-security/site-security/backup/	FALSE	1350949989	mtlink_hit1606	1

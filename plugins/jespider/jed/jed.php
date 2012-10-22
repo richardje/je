@@ -83,6 +83,11 @@ class plgJESpiderJed extends JPlugin
 		return $lasturl;
 	}
 	
+	protected function getGallery($params)
+	{
+		'<div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13049.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13049.jpg" width="110" height="110" alt="13049.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13050.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13050.jpg" width="110" height="110" alt="13050.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13051.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13051.jpg" width="110" height="110" alt="13051.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13052.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13052.jpg" width="110" height="110" alt="13052.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13053.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13053.jpg" width="110" height="110" alt="13053.jpg" /></a></div>';
+	}
+	
 	protected function getCategory($params)
 	{
 		$breadcrumbs = $params->get('data.breadcrumbs');
@@ -99,6 +104,7 @@ class plgJESpiderJed extends JPlugin
 		
 		foreach ($breadcrumbs as $title)
 		{
+			$depth++;
 			$alias = JApplication::stringURLSafe($title);
 			$table = new JTableCategory($db);
 			$table->load(array('alias' => $alias, 'extension' => 'com_jed'));
@@ -106,6 +112,7 @@ class plgJESpiderJed extends JPlugin
 			{
 				$table->title			= $title;
 				$table->alias			= $alias;
+				$table->description		= $this->params->get("data.{$depth}", '');
 				$table->extension		= 'com_jed';
 				$table->published		= 1;
 				$table->access			= 1;

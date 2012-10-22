@@ -148,8 +148,8 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function crawl()
 	{
-		$this->url = 'http://extensions.joomla.org/extensions/administration';
-		$this->params->set('crawling_data', false);
+		$this->url = 'http://extensions.joomla.org/extensions/access-a-security/site-security/backup/1606';
+		$this->params->set('crawling_data', true);
 		$content = $this->getContent();
 		//echo $content; die();
 		if (empty($content))
@@ -230,6 +230,15 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function parsePages($content)
 	{
+		$description = '';
+		if (preg_match('#<div id="cat-desc">(.*?)</div>#is', $content, $matches))
+		{
+			$description = $matches[1];
+			$description = strip_tags($description);
+			$description = trim($description);
+		}
+		$this->params->set('data.'.$this->params->get('depth'), $description);
+		
 		$content = $this->clean($content, 'items');
 		$pattern = $this->params->get('regex.items');
 		//$pattern = '<div class="listing-summary">\s*<h3><a href="(?P<link>.*?)"[^>]>.*?</a> </h3>(?:<a href="\1"><img[^>]* src="(?P<avatar>[^"]*)")?';
