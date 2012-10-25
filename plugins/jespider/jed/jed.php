@@ -18,53 +18,88 @@ class plgJESpiderJed extends JPlugin
 
 	public function onAfterParseData($params)
 	{
-		print_r($params);die();
 		$db = JFactory::getDbo();
 		$table = new JTableJed($db);
 		$table->load(array('md5url' => md5($params->get('url'))));
 		
 		$lastUpdate				= new JDate($params->get('data.last_update'));
 		$dateAdded				= new JDate($params->get('data.date_added'));
+		$today					= new JDate();
 		
 		$table->url				= $params->get('url');
 		$table->md5url			= md5($table->url);
-		$table->title			= $params->get('title', '');
-		$table->fulltext		= $params->get('description', '');
+		$table->title			= $params->get('data.title', '');
+		$table->alias			= JApplication::stringURLSafe($table->title);
+		$table->fulltext		= $params->get('data.description', '');
+		$table->introtext		= $this->getIntrotext($table->fulltext);
 		$table->catid			= $this->getCategory($params);
+		$table->avatar			= $this->getAvatar($params);
+		$table->gallery			= $this->getGallery($params);
 		
-		$table->feature			= ($params->get('data.feature')		== '') ? false : true;
-		$table->popular			= ($params->get('data.popular')		== '') ? false : true;
-		$table->component		= ($params->get('data.component')	== '') ? false : true;
-		$table->module			= ($params->get('data.module')		== '') ? false : true;
-		$table->plugin			= ($params->get('data.plugin')		== '') ? false : true;
-		$table->language		= ($params->get('data.language')	== '') ? false : true;
-		$table->specific		= ($params->get('data.specific')	== '') ? false : true;
-		$table->compat_15		= ($params->get('data.compat_15')	== '') ? false : true;
-		$table->compat_25 		= ($params->get('data.compat_25')	== '') ? false : true;
-		$table->compat_30 		= ($params->get('data.compat_30')	== '') ? false : true;
+		$table->featured		= ($params->get('data.feature', '')		== '') ? false : true;
+		$table->popular			= ($params->get('data.popular', '')		== '') ? false : true;
+		$table->component		= ($params->get('data.component', '')	== '') ? false : true;
+		$table->module			= ($params->get('data.module', '')		== '') ? false : true;
+		$table->plugin			= ($params->get('data.plugin', '')		== '') ? false : true;
+		$table->language		= ($params->get('data.language', '')	== '') ? false : true;
+		$table->specific		= ($params->get('data.specific', '')	== '') ? false : true;
+		$table->compat_15		= ($params->get('data.compat_15', '')	== '') ? false : true;
+		$table->compat_25 		= ($params->get('data.compat_25', '')	== '') ? false : true;
+		$table->compat_30 		= ($params->get('data.compat_30', '')	== '') ? false : true;
 		
-		$table->version			= $params->get('data.version');
+		$table->version			= $params->get('data.version', '');
 		$table->date_added		= $dateAdded->toSql();
 		$table->last_update		= $lastUpdate->toSql();
 		$table->rating			= $params->get('data.rating', 0);
-		$table->rating_user		= $params->get('data.rating_user', 0);
+		$table->rating_count	= $params->get('data.rating_user', 0);
+		$table->rating_sum		= round($table->rating * $table->rating_count);
 		$table->favorite		= $params->get('data.favorite', 0);
 		$table->license			= $params->get('data.license', '');
 		$table->view			= $params->get('data.view', 0);
 		
 		$table->developer		= $params->get('data.developer', '');
-		$table->website			= $params->get('data.website');
-		$table->download_link	= $params->get('data.download_link');
-		$table->demo_link		= $params->get('data.demo_link');
-		$table->support_link	= $params->get('data.support_link');
-		$table->document_link	= $params->get('data.document_link');
+		$table->website			= $this->getRedirectUrl($params->get('data.website'));
+		$table->download_url	= $params->get('data.download_link');
+		$table->demo_url		= $params->get('data.demo_link');
+		$table->support_url		= $params->get('data.support_link');
+		$table->document_url	= $params->get('data.document_link');
 		
-		print_r($table);die();
+		$time = $today->toUnix() - $dateAdded->toUnix();
+		$days = ($time / (60 * 60 * 24)) + 1;
+		$table->ordering = floor($table->view / $days);
+		
+		if (!$table->id)
+		{
+			$table->state = 0;
+		}
+		
+		//print_r($params);
+		//print_r($table);die();
 		
 		if ($table->store())
 		{
 			$params->set('success', true);
 		}
+	}
+	
+	protected function getIntrotext($fulltext)
+	{
+		$fulltext = trim(strip_tags($fulltext));
+		if (preg_match('#(^.{250,300}?)\s#is', $fulltext, $matches))
+		{
+			$introtext = $matches[1];
+		}
+		else
+		{
+			$introtext = $fulltext;
+		}
+		
+		if (strlen($introtext) < strlen($fulltext))
+		{
+			$introtext = $introtext . '...';
+		}
+		
+		return $introtext;
 	}
 	
 	protected function getRedirectUrl($url)
@@ -83,9 +118,32 @@ class plgJESpiderJed extends JPlugin
 		return $lasturl;
 	}
 	
+	protected function getAvatar($params)
+	{
+		if (preg_match('#.*?/listings/m/([^"]+)"#is', $params->get('data.gallery', ''), $matches))
+		{
+			$avatar = $matches[1];
+		}
+		else
+		{
+			$avatar = '';
+		}
+		
+		return $avatar;
+	}
+	
 	protected function getGallery($params)
 	{
-		'<div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13049.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13049.jpg" width="110" height="110" alt="13049.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13050.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13050.jpg" width="110" height="110" alt="13050.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13051.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13051.jpg" width="110" height="110" alt="13051.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13052.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13052.jpg" width="110" height="110" alt="13052.jpg" /></a></div><div class="thumbnail" style="text-align:center; width:140px;height:120px"><a rel="lightbox-1606" href="http://extensions.joomla.org//components/com_mtree/img/listings/m/13053.jpg"><img border="0" src="http://extensions.joomla.org/components/com_mtree/img/listings/s/13053.jpg" width="110" height="110" alt="13053.jpg" /></a></div>';
+		if (preg_match_all('#href="[^"]+/listings/m/([^"]+)"#is', $params->get('data.gallery', ''), $matches))
+		{
+			$gallery = implode('|', $matches[1]);
+		}
+		else
+		{
+			$gallery = '';
+		}
+		
+		return $gallery;
 	}
 	
 	protected function getCategory($params)
@@ -141,6 +199,11 @@ class plgJESpiderJed extends JPlugin
 					$this->setError($table->getError());
 					return false;
 				}
+			}
+			else if ($this->params->get("data.{$depth}", '') != '')
+			{
+				$table->description = $this->params->get("data.{$depth}", '');
+				$table->store();
 			}
 			$parentId = $table->id;
 		}

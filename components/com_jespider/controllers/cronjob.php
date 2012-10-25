@@ -65,6 +65,10 @@ class JESpiderControllerCronjob extends JControllerLegacy
 				{
 					$crawled++;
 				}
+				else
+				{
+					//die('error');
+				}
 			}
 		}
 	}

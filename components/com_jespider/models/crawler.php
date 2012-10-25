@@ -148,8 +148,8 @@ class JESpiderModelCrawler extends JModelLegacy
 	 */
 	public function crawl()
 	{
-		$this->url = 'http://extensions.joomla.org/extensions/access-a-security/site-security/backup/1606';
-		$this->params->set('crawling_data', true);
+		//$this->url = 'http://extensions.joomla.org/extensions/access-a-security/site-security/backup/1606';
+		//$this->params->set('crawling_data', true);
 		$content = $this->getContent();
 		//echo $content; die();
 		if (empty($content))
@@ -163,7 +163,9 @@ class JESpiderModelCrawler extends JModelLegacy
 		}
 		else
 		{
-			$parsed = ($this->parsePages($content)) || ($this->parsePageLinks($content));
+			$parsed1	= $this->parsePages($content);
+			$parsed2	= $this->parsePageLinks($content);
+			$parsed		= $parsed1 || $parsed2;
 		}
 		
 		if ($parsed)
