@@ -70,7 +70,7 @@ class plgJESpiderJed extends JPlugin
 		
 		if (!$table->id)
 		{
-			$table->state = 0;
+			$table->state = 1;
 		}
 		
 		//print_r($params);

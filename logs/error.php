@@ -6,3 +6,4 @@
 #Fields: datetime	priority	category	message
 2012-10-06T00:50:21+00:00	INFO	joomlafailure	Username and password do not match or you do not have an account yet.
 2012-10-06T02:21:20+00:00	INFO	joomlafailure	Username and password do not match or you do not have an account yet.
+2012-10-25T14:51:24+00:00	INFO	joomlafailure	Username and password do not match or you do not have an account yet.
